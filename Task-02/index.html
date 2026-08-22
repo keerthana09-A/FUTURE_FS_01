@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini CRM - Task 02</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+<div class="max-w-6xl mx-auto p-4 md:p-8">
+<h1 class="text-3xl font-bold text-center mb-2">Mini CRM System</h1>
+<p class="text-center text-gray-600 mb-8">Task-02 | Future Interns | Keerthana</p>
+
+<div class="grid md:grid-cols-3 gap-6">
+<!-- Public Form -->
+<div class="bg-white p-6 rounded-xl shadow">
+<h2 class="font-bold text-lg mb-4">📝 New Lead Form (Public)</h2>
+<input id="name" placeholder="Full Name" class="w-full border p-2 rounded mb-3">
+<input id="email" placeholder="Email" class="w-full border p-2 rounded mb-3">
+<input id="phone" placeholder="Phone" class="w-full border p-2 rounded mb-3">
+<select id="status" class="w-full border p-2 rounded mb-3">
+<option>New</option><option>Contacted</option><option>Qualified</option><option>Closed</option>
+</select>
+<textarea id="notes" placeholder="Notes" class="w-full border p-2 rounded mb-3"></textarea>
+<button onclick="addLead()" class="w-full bg-black text-white py-2 rounded font-bold">Add Lead</button>
+</div>
+
+<!-- Dashboard -->
+<div class="md:col-span-2 bg-white p-6 rounded-xl shadow">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-bold text-lg">📊 Admin Dashboard</h2>
+<input id="search" onkeyup="renderLeads()" placeholder="Search name/email..." class="border p-1.5 rounded w-1/2">
+</div>
+<div class="grid grid-cols-4 gap-2 mb-4 text-center">
+<div class="bg-gray-50 p-2 rounded"><p class="text-xs">Total</p><b id="total">0</b></div>
+<div class="bg-blue-50 p-2 rounded"><p class="text-xs">New</p><b id="newC">0</b></div>
+<div class="bg-yellow-50 p-2 rounded"><p class="text-xs">Contacted</p><b id="contC">0</b></div>
+<div class="bg-green-50 p-2 rounded"><p class="text-xs">Closed</p><b id="closedC">0</b></div>
+</div>
+<div class="overflow-auto max-h-[400px]">
+<table class="w-full text-sm">
+<thead><tr class="bg-gray-100 text-left"><th class="p-2">Name</th><th class="p-2">Email</th><th class="p-2">Status</th><th class="p-2">Action</th></tr></thead>
+<tbody id="leadTable"></tbody>
+</table>
+</div>
+</div>
+</div>
+<p class="text-center mt-6 text-xs text-gray-500">Live: keerthana09-a.github.io/FUTURE_FS_01/Task-02/</p>
+</div>
+
+<script>
+let leads = JSON.parse(localStorage.getItem('crm_leads')||'[]');
+function addLead(){
+ const l={id:Date.now(),name:name.value,email:email.value,phone:phone.value,status:status.value,notes:notes.value};
+ if(!l.name||!l.email) return alert('Name & Email required');
+ leads.unshift(l); save();
+ name.value=email.value=phone.value=notes.value=''; alert('Lead Added!');
+}
+function save(){localStorage.setItem('crm_leads',JSON.stringify(leads));renderLeads();}
+function renderLeads(){
+ let s=search.value.toLowerCase();
+ let f=leads.filter(x=>x.name.toLowerCase().includes(s)||x.email.toLowerCase().includes(s));
+ leadTable.innerHTML=f.map(l=>`<tr class="border-b"><td class="p-2"><b>${l.name}</b><br><span class="text-xs text-gray-500">${l.phone}</span><br><span class="text-xs">${l.notes}</span></td><td class="p-2">${l.email}</td><td class="p-2"><select onchange="updateStatus(${l.id},this.value)" class="border rounded text-xs p-1"><option ${l.status=='New'?'selected':''}>New</option><option ${l.status=='Contacted'?'selected':''}>Contacted</option><option ${l.status=='Qualified'?'selected':''}>Qualified</option><option ${l.status=='Closed'?'selected':''}>Closed</option></select></td><td class="p-2"><button onclick="deleteLead(${l.id})" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Delete</button></td></tr>`).join('');
+ total.innerText=leads.length; newC.innerText=leads.filter(x=>x.status=='New').length; contC.innerText=leads.filter(x=>x.status=='Contacted').length; closedC.innerText=leads.filter(x=>x.status=='Closed').length;
+}
+function deleteLead(id){if(confirm('Delete?')){leads=leads.filter(x=>x.id!=id);save();}}
+function updateStatus(id,v){let l=leads.find(x=>x.id==id);l.status=v;save();}
+renderLeads();
+</script>
+</body>
+</html>
